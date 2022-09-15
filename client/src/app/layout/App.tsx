@@ -3,11 +3,15 @@ import { createTheme, CssBaseline } from "@mui/material";
 import { Container } from "@mui/system";
 import { useState } from "react";
 import { Route, Routes } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import AboutPage from "../../features/about/AboutPage";
 import Catalog from "../../features/catalog/Catalog";
 import ProductDetails from "../../features/catalog/ProductDetails";
 import ContactPage from "../../features/contact/ContactPage";
 import HomePage from "../../features/home/HomePage";
+import NotFound from "../errors/NotFound";
+import ServerError from "../errors/ServerError";
 import Header from "./Header";
 
 function App() {
@@ -28,6 +32,7 @@ function App() {
 
   return (
     <ThemeProvider theme={theme}>
+      <ToastContainer theme="colored" position="bottom-right" hideProgressBar />
       <CssBaseline />
       <Header handleSwitch={handleSwitch} />
       <Container>
@@ -37,6 +42,8 @@ function App() {
           <Route path='/catalog/:id' element={<ProductDetails />}/>
           <Route path='/about' element={<AboutPage />}/>
           <Route path='/contact' element={<ContactPage />}/>
+          <Route path='/server-error' element={<ServerError />}/>
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Container>
     </ThemeProvider>
