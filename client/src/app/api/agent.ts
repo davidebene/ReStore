@@ -1,6 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { toast } from 'react-toastify';
 import { PaginatedResponse } from "../models/pagination";
+import { store } from "../store/configureStore";
 
 const sleep = () => new Promise(resolve => setTimeout(resolve, 500));
 
@@ -8,6 +9,12 @@ axios.defaults.baseURL = 'http://localhost:5008/api/';
 axios.defaults.withCredentials = true;
 
 const responseBody = (response: AxiosResponse) => response.data;
+
+axios.interceptors.request.use(config => {
+    const token = store.getState().account.user?.token;
+    if(token) config.headers!.Authorization = token;
+    return config;
+})
 
 axios.interceptors.response.use(async response => {
     await sleep();
@@ -18,11 +25,25 @@ axios.interceptors.response.use(async response => {
     }
     return response
 }, (error: AxiosError) => {
-    const {status, statusText} = error.response!;
+    const {data, status, statusText} = error.response!;
     switch (status) {
         case 400:
+            if ((data as any).errors) {
+                const modelStateErrors: string[] = [];
+                for (const key in (data as any).errors) {
+                    if ((data as any).errors[key]) {
+                        modelStateErrors.push((data as any).errors[key])
+                    }
+                }
+                throw modelStateErrors.flat();
+            }
+            toast.error((data as any).title);
+            break;
         case 401:
             toast.error(statusText);
+            break;
+        case 403:
+            toast.error('You are not allowed to do that!');
             break;
         case 500:
             //navigate('/server-error');
@@ -60,10 +81,17 @@ const Basket = {
     removeItem: (productId: number, quantity: number) => requests.delete(`basket?productId=${productId}&quantity=${quantity}`),
 }
 
+const Account = {
+    login: (values: any) => requests.post('account/login', values),
+    register: (values: any) => requests.post('account/register', values),
+    currentUser: () => requests.get('account/currentUser')
+}
+
 const agent = {
     Catalog,
     TestErrors,
-    Basket
+    Basket,
+    Account
 }
 
 export default agent;

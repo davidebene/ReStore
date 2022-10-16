@@ -17,7 +17,6 @@ interface CatalogState {
 const productsAdapter = createEntityAdapter<Product>();
 
 function getAxiosParams(productParams: ProductParams) {
-    console.log(productParams);
     const params = new URLSearchParams();
     params.append('pageNumber', productParams.pageNumber.toString());
     params.append('pageSize', productParams.pageSize.toString());

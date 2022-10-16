@@ -1,11 +1,44 @@
 using API.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace API.Data
 {
     public static class DbInitializer
     {
-        public static void Initialize(StoreContext context)
+        public static async Task Initialize(StoreContext context, UserManager<User> userManager)
         {
+            var user = new User
+                {
+                    UserName = "bob",
+                    Email = "bob@test.com"
+                };
+            var admin = new User
+                {
+                    UserName = "admin",
+                    Email = "admin@test.com"
+                };
+
+            if(!userManager.Users.Any()) {
+                await userManager.CreateAsync(user, "Password1");
+                await userManager.AddToRoleAsync(user, "Member");
+            
+                await userManager.CreateAsync(admin, "Password2");
+                await userManager.AddToRolesAsync(admin, new[] {"Member", "Admin"});
+            }
+
+            var userDb = await userManager.FindByNameAsync(user.UserName);
+            if(userDb != null) {
+                bool userIsMember = await userManager.IsInRoleAsync(user, "Member");
+                if(!userIsMember) await userManager.AddToRoleAsync(user, "Member");
+            }
+            
+            var adminDb = await userManager.FindByNameAsync(admin.UserName);
+            if(adminDb != null) {
+                bool userIsAdmin = await userManager.IsInRoleAsync(admin, "Admin");
+                if(!userIsAdmin) await userManager.AddToRolesAsync(admin, new[] {"Member", "Admin"});
+            }
+            
             if(context.Products.Any()) return;
 
             var products = new List<Product>
