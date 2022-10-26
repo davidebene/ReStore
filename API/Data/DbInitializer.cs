@@ -27,7 +27,7 @@ namespace API.Data
                 await userManager.AddToRolesAsync(admin, new[] {"Member", "Admin"});
             }
 
-            var userDb = await userManager.FindByNameAsync(user.UserName);
+            /*var userDb = await userManager.FindByNameAsync(user.UserName);
             if(userDb != null) {
                 bool userIsMember = await userManager.IsInRoleAsync(user, "Member");
                 if(!userIsMember) await userManager.AddToRoleAsync(user, "Member");
@@ -37,7 +37,7 @@ namespace API.Data
             if(adminDb != null) {
                 bool userIsAdmin = await userManager.IsInRoleAsync(admin, "Admin");
                 if(!userIsAdmin) await userManager.AddToRolesAsync(admin, new[] {"Member", "Admin"});
-            }
+            }*/
             
             if(context.Products.Any()) return;
 
